@@ -1,19 +1,25 @@
-from rest_framework import generics
-
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics, permissions, filters
 from .pagination import CustomPagination
 from .serializers import *
-from .models import Post, Category, Tag, Experience, Comment, Skills, Service, Works, About, Contact
+from .models import Post, Experience, Comment, Skills, Service, Works, About, Contact
 
 
-class PostView(generics.ListAPIView):
+class PostView(generics.ListCreateAPIView):
+    queryset = Post.objects.all()
+    permission_classe = [permissions.IsAuthenticatedOrReadOnly]
+    filter_backend = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
+    filter_fields = ['category', 'tags']
+    ordering_fields = ['created_at']
+    search_fields = ['title', 'description']
+    serializer_class = PostSerializer
+    pagination_clas = CustomPagination
+
+
+class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    pagination_class = CustomPagination
-
-
-class TagView(generics.ListAPIView):
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class ExperienceView(generics.ListAPIView):
@@ -29,11 +35,6 @@ class CommentView(generics.ListCreateAPIView):
 class SkillsView(generics.ListAPIView):
     queryset = Skills.objects.all()
     serializer_class = SkillsSerializer
-
-
-class CategoryView(generics.ListAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
 
 
 class ServiceView(generics.ListAPIView):
